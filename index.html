@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <!-- iOS PWA 全屏配置 (加到主屏幕后完全隐藏浏览器外壳) -->
+    <!-- iOS PWA 全屏配置 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="System Update">
@@ -12,10 +12,10 @@
     <title>iOS Software Update</title>
     <style>
         * {
-            -webkit-touch-callout: none; /* 禁用长按弹出菜单 */
-            -webkit-user-select: none;   /* 禁用文字选中 */
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
             user-select: none;
-            touch-action: none;         /* 禁止双指缩放和手势 */
+            touch-action: none;
         }
         html, body {
             width: 100%;
@@ -29,24 +29,21 @@
             align-items: center;
             overflow: hidden;
             cursor: none;
-            transition: opacity 1s ease; /* 用于模拟重启黑屏 */
+            transition: opacity 1s ease;
         }
-        /* 真实 Apple Logo：纯白静态、严谨比例 */
         .apple-logo {
             width: 68px;
             height: 82px;
             fill: #ffffff;
-            margin-bottom: 55px; /* 原生黄金比例间距 */
+            margin-bottom: 55px;
         }
-        /* 真实 iOS 进度条外壳 */
         .progress-container {
             width: 215px;
             height: 4.5px;
-            background-color: #333336; /* iOS 原生暗灰底色 */
+            background-color: #333336;
             border-radius: 3px;
             overflow: hidden;
         }
-        /* 进度条填充 */
         .progress-bar {
             width: 0%;
             height: 100%;
@@ -58,18 +55,15 @@
 </head>
 <body onclick="enableFullscreen()" oncontextmenu="return false;">
 
-    <!-- 纯白 Apple Logo (无闪烁) -->
     <svg class="apple-logo" viewBox="0 0 170 170">
         <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.13-1.9-14.33-6.08-3.69-3.04-7.74-7.85-12.15-14.43-6.23-9.26-11.05-19.56-14.46-30.9-3.41-11.34-5.12-22.31-5.12-32.91 0-14.54 3.79-26.24 11.37-35.11 7.58-8.87 17.2-13.36 28.87-13.48 4.79 0 10.15 1.18 16.09 3.53 5.94 2.35 9.8 3.53 11.58 3.53 1.53 0 5.48-1.24 11.85-3.72 6.37-2.48 11.86-3.64 16.48-3.48 15.82.76 27.87 7.04 36.16 18.83-13.09 7.95-19.46 18.99-19.11 33.12.35 11.34 4.71 20.69 13.08 28.04 4.13 3.66 9.15 6.31 15.06 7.95-2.28 6.78-5.22 13.78-8.83 21zm-24.58-107.1c0 8.01-2.94 15.42-8.82 22.21-5.88 6.78-13.29 10.9-22.22 12.33-.24-1.53-.35-3.01-.35-4.45 0-7.79 3.09-15.52 9.27-23.19 6.18-7.68 13.76-12.01 22.75-13 0 .71.12 1.94.35 3.7l.02.38z"/>
     </svg>
 
-    <!-- 进度条 -->
     <div class="progress-container">
         <div id="bar" class="progress-bar"></div>
     </div>
 
     <script>
-        // 自动防止手机屏幕熄屏 (Screen Wake Lock)
         async function keepScreenAwake() {
             try {
                 if ('wakeLock' in navigator) {
@@ -79,7 +73,6 @@
         }
         keepScreenAwake();
 
-        // 允许点击全屏
         function enableFullscreen() {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen().catch(() => {});
@@ -87,33 +80,29 @@
         }
 
         const bar = document.getElementById('bar');
-        let progress = 14; // 从 14% 开始
+        let progress = 14;
 
         function updateProgress() {
             bar.style.width = progress + '%';
             let nextDelay = 1000;
 
             if (progress < 45) {
-                // 前期正常推进
                 progress += Math.floor(Math.random() * 3) + 1;
                 nextDelay = Math.random() * 1000 + 500;
             } else if (progress < 88) {
-                // 中期开始变慢，频繁停顿
                 progress += Math.random() > 0.45 ? 1 : 0;
                 nextDelay = Math.random() * 2500 + 1000;
             } else if (progress < 99) {
-                // 经典 99% 卡顿（模拟 iOS 校验系统文件）
                 progress += Math.random() > 0.85 ? 1 : 0;
                 nextDelay = Math.random() * 5000 + 3000;
             } else if (progress >= 99) {
-                // 走完后黑屏“重启”，进入第二阶段
                 setTimeout(() => {
-                    document.body.style.opacity = '0'; // 黑屏
+                    document.body.style.opacity = '0';
                     setTimeout(() => {
                         progress = 0;
                         bar.style.width = '0%';
                         document.body.style.opacity = '1';
-                        fastPhase(); // 执行第二次快速进度条
+                        fastPhase();
                     }, 2800);
                 }, 3500);
                 return;
@@ -122,7 +111,6 @@
             setTimeout(updateProgress, nextDelay);
         }
 
-        // 第二阶段（iOS 更新时重启后的第二阶段进度条）
         function fastPhase() {
             let interval = setInterval(() => {
                 progress += 2;
@@ -133,7 +121,6 @@
             }, 250);
         }
 
-        // 启动更新
         setTimeout(updateProgress, 1200);
     </script>
 </body>
